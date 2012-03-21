@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8>
+  <title>App</title>
+  <link rel="stylesheet" href="/application.css" type="text/css" charset="utf-8">
+  <script src="/application.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+    var jQuery  = require("jqueryify");
+    var exports = this;
+    jQuery(function(){
+      var App = require("index");
+      exports.app = new App({el: $("body")});      
+    });
+  </script>
+  <script src="/lib/RGraph.common.core.js" ></script>
+    <script src="/lib/RGraph.common.effects.js" ></script>
+    <script src="/lib/RGraph.common.tooltips.js" ></script>
+    <script src="/lib/RGraph.common.key.js" ></script>
+    <script src="/lib/RGraph.bar.js" ></script>
+    <script src="/lib/RGraph.bar.js" ></script>
+    <script src="/lib/jquery.mustache.js" ></script>
+</head>
+<body>
+<div class="graph">
+
+</div> 
+     
+</body>
+</html>
