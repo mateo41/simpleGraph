@@ -3,8 +3,11 @@
       
             <div id="timeSelect">
 				<input id="yearInput" type="radio" name="time" value="Year" checked > Year
-				<input id="monthInput" type="radio" name="time" value="Week"> Month
+				<input id="monthInput" type="radio" name="time" value="Month"> Month
 				<input id="weekInput" type="radio" name="time" value="Week"> Week
 				<input id="dayInput" type="radio" name="time" value ="Day"> Day
+				<img src="/images/2leftarrow.png" id="leftButton"/>
+				{{dateString}}
+				<img src="/images/2rightarrow.png" id="rightButton"/>
             </div>
        </div>

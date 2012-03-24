@@ -12,25 +12,74 @@ class Graph extends Spine.Controller
         '#yearInput'  : 'yearBox' 
         '#monthInput' : 'monthBox' 
         '#weekInput'  : 'weekBox' 
-        '#yearInput'  : 'dayBox' 
+        '#dayInput'   : 'dayBox'
+        '#leftButton' : 'leftButton'
+        '#rightButton': 'rightButton'
+         
 
     events:
-        "click #timeSelect" : 'click_time'     
+        'click #timeSelect' : 'click_quantum'
+        'click #leftButton' : 'click_left'
+        'click #rightButton': 'click_right'     
           
     constructor: ->
         super
         console.log "In Graph constructor"
         console.log @year_labels
-        @graphType = "year"
-        @year = 2011
-        
+        @state = 
+            year:2012
+            week:1
+            quantum: 'W'
+            
+    makeDateString: =>
+        switch @state.quantum
+            when 'Y'
+                @state.year
+            when 'M'
+                [@state.month,@state.year].join()
+            when 'W'
+                tmpDate = Date.parse("1/1/"+@state.year)
+                tmpDate.addWeeks(@state.week-1)
+                tmpDate.format("mmm,dd")
+            when 'D'
+                tmpDate = Date.parse("1/1/"+@state.year)
+                tmpDate.addDays(@state.day-1)
+                tmpDate.format("mmm,dd,yyyy")
+                        
+    makeUrl: =>
+        console.log @state
+        switch @state.quantum
+            when 'Y'
+                ["/api/1.0/year/", @state.year].join("")
+            when 'M'
+                ["/api/1.0/year/", @state.year, "/month/", @state.month].join("")
+            when 'W'
+                ["/api/1.0/year/", @state.year, "/week/", @state.week].join("")
+            when 'D'
+                ["/api/1.0/year/", @state.year, "/day/", @state.day].join("")             
+    
+    updateView: =>
+        console.log @state.quantum
+        switch @state.quantum
+            when 'Y'
+                @yearBox.attr("checked", "checked")
+            when 'M'
+                @monthBox.attr("checked", "checked")
+            when 'W'
+                @weekBox.attr("checked", "checked")
+            when 'D'
+                @dayBox.attr("checked", "checked")
+                
     render: =>
         console.log "In render" 
         $.mustache.load("graph", "/graph.mu").done (template) =>
-            console.log $.mustache template
+            @dateString = @makeDateString()
+            console.log @dateString
             @html $.mustache(template, @)
-
-        @doRest("/api/1.0/year/2011/")
+            
+            @updateView()
+            url = @makeUrl()
+            @doRest(url)
         
     doRest: (url) =>
         click_event = @click_event
@@ -62,31 +111,82 @@ class Graph extends Spine.Controller
         @el.addClass('active')
         @
     
-    click_box: (event) =>
+    stateTransition: (old, new) =>
+        
+        switch new
+            when "Y"
+                @state.quantum = "Y"
+            
+            when "M"
+                switch old
+                when "Y"
+                    @state.month = 1
+                when "M"
+                     console.log "do nothing"
+                when "W"
+                     tmpDate = Date.parse("1/1/"+@state.year)
+                     tmpDate.addWeeks(@state.week-1)
+                     @state.month = tmpDate.getMonth()+1
+                when "D"
+                     tmpDate = Date.parse("1/1/"+@state.year)
+                     tmpDate.addDays(@state.day-1)
+                     @state.month = tmpDate.getMonth()+1
+            when "W"
+            
+            when "D"
+            
+    click_quantum: (event) =>
         console.log "Clicked Radio button"
         box = $('input:checked')
-        console.log(box.attr("value"))
         time = box.attr("value")
-    
+        quantum = time[0]
+        stateTransition(@state.quantum, quantum)
+        
+    click_left: (event) =>
+        switch @state.quantum
+            when "Y" 
+                @state.year = @state.year-1
+            when "M"
+                @state.month = @state.month-1
+            when "W" 
+                @state.week = @state.week-1
+            when "D" 
+                @state.day = @state.day-1
+        @render()
+         
+    click_right: (event) =>
+        console.log "in click right"
+        switch @state.quantum
+            when "Y" 
+                @state.year = @state.year+1
+            when "M"
+                @state.month = @state.month+1
+            when "W" 
+                @state.week = @state.week+1
+            when "D" 
+                @state.day = @state.day+1
+        @render()        
+                
     click_event: (event, bar) =>
         console.log "In click event"
         console.log bar[5]
-        index = bar[5] + 1
-        console.log @graphType 
-        switch @graphType
-            when "year" 
-                @graphType ="month"
-                @monthBox.attr("checked", "checked")
-                @doRest(["/api/1.0/year/", @year, "/month/", index].join(""))
-            when "month"
+        index = bar[5] + 1 
+        switch @state.quantum
+            when "Y" 
+                @state.quantum = 'M'
+                @state.month = index
+            when "M"
                 console.log "Can't drill down" 
-            when "week" 
-                @graphType = "day"
-                @dayBox.attr("checked", "checked")
-                @doRest(["/api/1.0/year/", @year, "/day/", 200].join(""))  
-            when "day" 
+            when "W" 
+                @state.quantum = 'D'
+                tmpDate = Date.parse("1/1/"+@state.year)
+                tmpDate.addWeeks(@state.week-1)
+                tmpDate.addDays(index)
+                @state.day = tmpDate.getDayOfYear()
+            when "D" 
                 console.log "Can't drill down" 
             else
                 console.log "Unhandled"
+        @render()    
                                          
 module.exports = Graph           
