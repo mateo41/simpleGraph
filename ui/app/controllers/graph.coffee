@@ -4,6 +4,7 @@ class Graph extends Spine.Controller
     className: "graph"
     
     @year_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    @week_labels = ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     
     elements:
         '#button' : 'button'
@@ -26,37 +27,35 @@ class Graph extends Spine.Controller
         super
         console.log "In Graph constructor"
         console.log @year_labels
+        start = Date.parse("1/1/2012")
         @state = 
-            year:2012
-            week:1
+            date : start
             quantum: 'W'
             
     makeDateString: =>
         switch @state.quantum
             when 'Y'
-                @state.year
+                @state.date.getFullYear()
             when 'M'
-                [@state.month,@state.year].join()
+                @state.date.format("mmm,yyyy")
             when 'W'
-                tmpDate = Date.parse("1/1/"+@state.year)
-                tmpDate.addWeeks(@state.week-1)
-                tmpDate.format("mmm,dd")
+                tmpDate = @state.date.clone()
+                tmpDate.addWeeks(1)
+                @state.date.format("mmm,dd")+"--"+tmpDate.format("mmm,dd,yyyy")
             when 'D'
-                tmpDate = Date.parse("1/1/"+@state.year)
-                tmpDate.addDays(@state.day-1)
-                tmpDate.format("mmm,dd,yyyy")
+                @state.date.format("mmm,dd,yyyy")
                         
     makeUrl: =>
         console.log @state
         switch @state.quantum
             when 'Y'
-                ["/api/1.0/year/", @state.year].join("")
+                ["/api/1.0/year/", @state.date.getFullYear()].join("")
             when 'M'
-                ["/api/1.0/year/", @state.year, "/month/", @state.month].join("")
+                ["/api/1.0/year/", @state.date.getFullYear(), "/month/", @state.date.getMonth()+1].join("")
             when 'W'
-                ["/api/1.0/year/", @state.year, "/week/", @state.week].join("")
+                ["/api/1.0/year/", @state.date.getFullYear(), "/week/", @state.date.getWeekOfYear()].join("")
             when 'D'
-                ["/api/1.0/year/", @state.year, "/day/", @state.day].join("")             
+                ["/api/1.0/year/", @state.date.getFullYear(), "/day/", @state.date.getDayOfYear()+1].join("")             
     
     updateView: =>
         console.log @state.quantum
@@ -83,7 +82,7 @@ class Graph extends Spine.Controller
         
     doRest: (url) =>
         click_event = @click_event
-        
+        state = @state
         $.ajax( url: url,
             type: "GET",
             contentType: "application/json" 
@@ -94,7 +93,14 @@ class Graph extends Spine.Controller
             console.log data.length
             @bar = new RGraph.Bar('bar1', data)
             @bar.Set('chart.gutter.left', 55)
-            #@bar.Set('chart.labels', Graph.year_labels)
+            if state.quantum is 'Y' 
+                @bar.Set('chart.labels', Graph.year_labels)
+            if state.quantum is 'W'
+                @bar.Set('chart.labels', Graph.week_labels)
+            if state.quantum is 'M'
+                @bar.Set('chart.labels', [1..data.length])
+            if state.quantum is 'D'
+                @bar.Set('chart.labels', [0..data.length-1])        
             @bar.Set('chart.events.click', click_event ) 
             RGraph.Effects.Bar.Grow(@bar)
             
@@ -110,79 +116,55 @@ class Graph extends Spine.Controller
         @render()
         @el.addClass('active')
         @
-    
-    stateTransition: (old, new) =>
-        
-        switch new
-            when "Y"
-                @state.quantum = "Y"
-            
-            when "M"
-                switch old
-                when "Y"
-                    @state.month = 1
-                when "M"
-                     console.log "do nothing"
-                when "W"
-                     tmpDate = Date.parse("1/1/"+@state.year)
-                     tmpDate.addWeeks(@state.week-1)
-                     @state.month = tmpDate.getMonth()+1
-                when "D"
-                     tmpDate = Date.parse("1/1/"+@state.year)
-                     tmpDate.addDays(@state.day-1)
-                     @state.month = tmpDate.getMonth()+1
-            when "W"
-            
-            when "D"
             
     click_quantum: (event) =>
         console.log "Clicked Radio button"
         box = $('input:checked')
         time = box.attr("value")
         quantum = time[0]
-        stateTransition(@state.quantum, quantum)
-        
-    click_left: (event) =>
+        if quantum is 'M'
+            dayInMonth = @state.date.getDate()
+            @state.date.addDays(-(dayInMonth-1))
+        if quantum is 'Y'
+            dayInYear = @state.date.getDayOfYear()
+            @state.date.addDays(-dayInYear)
+            
+        @state.quantum = quantum
+        @render()
+   
+    shift_dates: (amount) => 
         switch @state.quantum
             when "Y" 
-                @state.year = @state.year-1
+                @state.date.addYears(amount)
             when "M"
-                @state.month = @state.month-1
+                @state.date.addMonths(amount)
             when "W" 
-                @state.week = @state.week-1
+                @state.date.addWeeks(amount)
             when "D" 
-                @state.day = @state.day-1
+                @state.date.addDays(amount)
+                    
+    click_left: (event) =>
+        @shift_dates(-1)
         @render()
          
     click_right: (event) =>
-        console.log "in click right"
-        switch @state.quantum
-            when "Y" 
-                @state.year = @state.year+1
-            when "M"
-                @state.month = @state.month+1
-            when "W" 
-                @state.week = @state.week+1
-            when "D" 
-                @state.day = @state.day+1
+        @shift_dates(1)
         @render()        
                 
     click_event: (event, bar) =>
         console.log "In click event"
         console.log bar[5]
-        index = bar[5] + 1 
+        index = bar[5] 
         switch @state.quantum
             when "Y" 
                 @state.quantum = 'M'
-                @state.month = index
+                @state.date.addMonths(index)
             when "M"
-                console.log "Can't drill down" 
+                @state.quantum = 'D'
+                @state.date.addDays(index)
             when "W" 
                 @state.quantum = 'D'
-                tmpDate = Date.parse("1/1/"+@state.year)
-                tmpDate.addWeeks(@state.week-1)
-                tmpDate.addDays(index)
-                @state.day = tmpDate.getDayOfYear()
+                @state.date.addDays(index)
             when "D" 
                 console.log "Can't drill down" 
             else
