@@ -1915,7 +1915,7 @@
     * This is a compatibility hack provided for Opera and Safari which
     * don't support ther Javascript 1.8.5 function.bind()
     */
-    if (!Function.prototype.bind) {  
+   /* if (!Function.prototype.bind) {  
       Function.prototype.bind = function (oThis) {  
         if (typeof this !== "function") {  
           // closest thing possible to the ECMAScript 5 internal IsCallable function  
@@ -1938,7 +1938,7 @@
         return fBound;  
       };  
     }
-
+ */
 
     /**
     * Rose chart explode

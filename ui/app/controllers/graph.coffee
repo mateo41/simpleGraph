@@ -71,19 +71,32 @@ class Graph extends Spine.Controller
                 
     render: =>
         console.log "In render" 
-        $.mustache.load("graph", "/graph.mu").done (template) =>
-            @dateString = @makeDateString()
-            console.log @dateString
-            @html $.mustache(template, @)
+        #$.mustache.load("graph", "./lib/graph.mu").done (template) =>
+        @dateString = @makeDateString()
+        console.log @dateString
+        template = '<div style="text-align: center">
+            <canvas id="bar1" width="480" height="200">[No canvas support]</canvas>
+            <div id="timeSelect">
+		    <input id="yearInput" type="radio" name="time" value="Year" checked > Year
+			<input id="monthInput" type="radio" name="time" value="Month"> Month
+			<input id="weekInput" type="radio" name="time" value="Week"> Week
+			<input id="dayInput" type="radio" name="time" value ="Day"> Day
+			<img src="./images/2leftarrow.png" id="leftButton"/>
+			{{dateString}}
+			<img src="./images/2rightarrow.png" id="rightButton"/>
+            </div>
+            </div>'
+        @html $.mustache(template, @)
             
-            @updateView()
-            url = @makeUrl()
-            @doRest(url)
+        @updateView()
+        url = @makeUrl()
+        @doRest(url)
         
     doRest: (url) =>
         click_event = @click_event
         state = @state
-        $.ajax( url: url,
+        prefix = "http://ec2-107-21-190-76.compute-1.amazonaws.com"
+        $.ajax( url: prefix+url,
             type: "GET",
             contentType: "application/json" 
         ).done((result, status, xhr) ->
