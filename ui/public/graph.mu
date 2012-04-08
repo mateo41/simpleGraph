@@ -6,8 +6,8 @@
 				<input id="monthInput" type="radio" name="time" value="Month"> Month
 				<input id="weekInput" type="radio" name="time" value="Week"> Week
 				<input id="dayInput" type="radio" name="time" value ="Day"> Day
-				<img src="/images/2leftarrow.png" id="leftButton"/>
+				<img src="/images/2arrow_left.png" id="leftButton"/>
 				{{dateString}}
-				<img src="/images/2rightarrow.png" id="rightButton"/>
+				<img src="/images/2arrow_right.png" id="rightButton"/>
             </div>
        </div>

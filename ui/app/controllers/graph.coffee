@@ -5,6 +5,7 @@ class Graph extends Spine.Controller
     
     @year_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     @week_labels = ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    @hour_labels = ['1am', '4am', '7am','10am','1pm','4pm','7pm','10pm']
     
     elements:
         '#button' : 'button'
@@ -75,7 +76,6 @@ class Graph extends Spine.Controller
             @dateString = @makeDateString()
             console.log @dateString
             @html $.mustache(template, @)
-            
             @updateView()
             url = @makeUrl()
             @doRest(url)
@@ -92,15 +92,38 @@ class Graph extends Spine.Controller
             data = (v for k,v of result)
             console.log data.length
             @bar = new RGraph.Bar('bar1', data)
-            @bar.Set('chart.gutter.left', 55)
+            @bar.Set('chart.gutter.left', 65)
+            @bar.Set('chart.title', 'Energy Usage')
+            @bar.Set('chart.title.yaxis', 'Watt hours')
+            @bar.Set('chart.title.yaxis.pos', .08)
+            @bar.Set('chart.gutter.bottom', 40)
+            @bar.Set('chart.colors', ('0099ff' for i in [1..data.length]))
             if state.quantum is 'Y' 
                 @bar.Set('chart.labels', Graph.year_labels)
             if state.quantum is 'W'
                 @bar.Set('chart.labels', Graph.week_labels)
+                @bar.Set('chart.colors', ['0033cc','0099ff' , '0099ff','0099ff', '0099ff', '0099ff','0033cc'])
+                @bar.Set('chart.colors.sequential', true)
             if state.quantum is 'M'
+                f = ( month, year ) ->
+                    d = new Date(month+",1 "+year)
+                    numDays = d.getDaysInMonth()
+                    f2 = (s) ->
+                        d = new Date(s)
+                        #wd = d.isWeekday()
+                        color = if d.isWeekday() then '0099ff' else '0033cc'
+                        color
+                    dates = (f2(month+","+day+" "+year) for day in [1..numDays])
+                days = f(state.date.getMonthName(), state.date.getFullYear())
+                @bar.Set('chart.colors', days )
+                @bar.Set('chart.colors.sequential', true) 
                 @bar.Set('chart.labels', [1..data.length])
+                @bar.Set('chart.text.angle', 90)
             if state.quantum is 'D'
-                @bar.Set('chart.labels', [0..data.length-1])        
+                @bar.Set('chart.labels', Graph.hour_labels)
+                @bar.Set('chart.text.angle', 90)
+                @bar.Set('chart.labels.specific.align', 'left')
+                     
             @bar.Set('chart.events.click', click_event ) 
             RGraph.Effects.Bar.Grow(@bar)
             
