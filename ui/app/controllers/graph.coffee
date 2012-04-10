@@ -22,7 +22,9 @@ class Graph extends Spine.Controller
     events:
         'click #timeSelect' : 'click_quantum'
         'click #leftButton' : 'click_left'
-        'click #rightButton': 'click_right'     
+        'click #rightButton': 'click_right'
+        'swiperight #bar1'  : 'swipe_right'
+        'swipeleft #bar1'   : 'swipe_left'     
           
     constructor: ->
         super
@@ -204,6 +206,12 @@ class Graph extends Spine.Controller
                 console.log "Can't drill down" 
             else
                 console.log "Unhandled"
-        @render()    
+        @render()
+        
+    swipe_right: (event) =>
+        console.log  "swipe right"
+        
+    swipe_left: (event) =>
+        console.log "swipe left"         
                                          
 module.exports = Graph           
