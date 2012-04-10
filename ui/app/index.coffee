@@ -13,6 +13,7 @@ class App extends Spine.Controller
       @manager = new Spine.Manager(@graph)
       @graph.active()
       @el.show
+      console.log @el
       @append @graph
  
 module.exports = App
