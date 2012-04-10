@@ -44,9 +44,9 @@ class Graph extends Spine.Controller
             when 'W'
                 tmpDate = @state.date.clone()
                 tmpDate.addWeeks(1)
-                @state.date.format("mmm,dd")+"--"+tmpDate.format("mmm,dd,yyyy")
+                @state.date.format("mmm dd")+"-"+tmpDate.format("mmm dd,yyyy")
             when 'D'
-                @state.date.format("mmm,dd,yyyy")
+                @state.date.format("mmm dd,yyyy")
                         
     makeUrl: =>
         console.log @state
@@ -77,7 +77,7 @@ class Graph extends Spine.Controller
         @dateString = @makeDateString()
         console.log @dateString
         template = '<div style="text-align: center">
-            <canvas id="bar1" width="480" height="240">[No canvas support]</canvas>
+            <canvas id="bar1" width="480" height="200">[No canvas support]</canvas>
             <div id="timeSelect">
             <input id="yearInput" type="radio" name="time" value="Year" checked > Year
             <input id="monthInput" type="radio" name="time" value="Month"> Month
@@ -97,6 +97,7 @@ class Graph extends Spine.Controller
     doRest: (path) =>
         click_event = @click_event
         state = @state
+        dateString = @makeDateString()
         host = "http://ec2-107-21-190-76.compute-1.amazonaws.com"
         $.ajax( url: host+path,
             type: "GET",
@@ -108,7 +109,7 @@ class Graph extends Spine.Controller
             console.log data.length
             @bar = new RGraph.Bar('bar1', data)
             @bar.Set('chart.gutter.left', 65)
-            @bar.Set('chart.title', 'Energy Usage')
+            @bar.Set('chart.title', dateString+' Energy Usage')
             @bar.Set('chart.title.yaxis', 'Watt hours')
             @bar.Set('chart.title.yaxis.pos', .08)
             @bar.Set('chart.gutter.bottom', 40)
@@ -210,8 +211,12 @@ class Graph extends Spine.Controller
         
     swipe_right: (event) =>
         console.log  "swipe right"
+        @shift_dates(-1)
+        @render()
         
     swipe_left: (event) =>
-        console.log "swipe left"         
+        console.log "swipe left"
+        @shift_dates(1)
+        @render()       
                                          
 module.exports = Graph           
