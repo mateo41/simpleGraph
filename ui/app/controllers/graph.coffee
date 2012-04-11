@@ -20,7 +20,10 @@ class Graph extends Spine.Controller
          
 
     events:
-        'click #timeSelect' : 'click_quantum'
+        'click #yearInput' : 'click_quantum_year'
+        'click #monthInput' : 'click_quantum_month'
+        'click #weekInput' : 'click_quantum_week'
+        'click #dayInput' : 'click_quantum_day'
         'click #leftButton' : 'click_left'
         'click #rightButton': 'click_right'
         'swiperight #bar1'  : 'swipe_right'
@@ -44,9 +47,9 @@ class Graph extends Spine.Controller
             when 'W'
                 tmpDate = @state.date.clone()
                 tmpDate.addWeeks(1)
-                @state.date.format("mmm,dd")+"--"+tmpDate.format("mmm,dd,yyyy")
+                @state.date.format("mmm dd")+"--"+tmpDate.format("mmmdd,yyyy")
             when 'D'
-                @state.date.format("mmm,dd,yyyy")
+                @state.date.format("mmm dd,yyyy")
                         
     makeUrl: =>
         console.log @state
@@ -62,15 +65,15 @@ class Graph extends Spine.Controller
     
     updateView: =>
         console.log @state.quantum
-        switch @state.quantum
-            when 'Y'
-                @yearBox.attr("checked", "checked")
-            when 'M'
-                @monthBox.attr("checked", "checked")
-            when 'W'
-                @weekBox.attr("checked", "checked")
-            when 'D'
-                @dayBox.attr("checked", "checked")
+        #switch @state.quantum
+        #    when 'Y'
+        #        @yearBox.attr("checked", "checked")
+        #    when 'M'
+        #        @monthBox.attr("checked", "checked")
+        #    when 'W'
+        #        @weekBox.attr("checked", "checked")
+        #    when 'D'
+        #        @dayBox.attr("checked", "checked")
                 
     render: =>
         console.log "In render" 
@@ -85,6 +88,7 @@ class Graph extends Spine.Controller
     doRest: (url) =>
         click_event = @click_event
         state = @state
+        dateString = @makeDateString()
         $.ajax( url: url,
             type: "GET",
             contentType: "application/json" 
@@ -95,7 +99,7 @@ class Graph extends Spine.Controller
             console.log data.length
             @bar = new RGraph.Bar('bar1', data)
             @bar.Set('chart.gutter.left', 65)
-            @bar.Set('chart.title', 'Energy Usage')
+            @bar.Set('chart.title', dateString+' Energy Usage')
             @bar.Set('chart.title.yaxis', 'Watt hours')
             @bar.Set('chart.title.yaxis.pos', .08)
             @bar.Set('chart.gutter.bottom', 40)
@@ -142,21 +146,32 @@ class Graph extends Spine.Controller
         @el.addClass('active')
         @
             
-    click_quantum: (event) =>
-        console.log "Clicked Radio button"
-        box = $('input:checked')
-        time = box.attr("value")
-        quantum = time[0]
-        if quantum is 'M'
-            dayInMonth = @state.date.getDate()
-            @state.date.addDays(-(dayInMonth-1))
-        if quantum is 'Y'
-            dayInYear = @state.date.getDayOfYear()
-            @state.date.addDays(-dayInYear)
-            
-        @state.quantum = quantum
+    click_quantum_year: (event) =>
+        console.log "clicked year button"
+        quantum = 'Y'
+        dayInYear = @state.date.getDayOfYear()
+        @state.date.addDays(-dayInYear)
+        @state.quantum = 'Y'
         @render()
-   
+
+    click_quantum_month: (event) =>
+    	console.log "clicked month button"
+    	console.log "test"
+    	dayInMonth = @state.date.getDate()
+    	@state.date.addDays(-(dayInMonth-1))
+    	@state.quantum = 'M'
+    	@render()
+          
+    click_quantum_week: (event) =>
+    	console.log "clicked week button"
+    	@state.quantum = 'W'
+    	@render()
+    
+    click_quantum_day: (event) =>
+        console.log "clicked day button"
+        @state.quantum = 'D'
+        @render()
+        	
     shift_dates: (amount) => 
         switch @state.quantum
             when "Y" 
@@ -199,13 +214,13 @@ class Graph extends Spine.Controller
     swipe_right: (event) =>
         console.log event
         console.log "in swipe_right"
-        @shift_dates(1)
+        @shift_dates(-1)
         @render()
         
     swipe_left: (event) =>
         console.log event
         console.log "in swipe_left"
-        @shift_dates(-1)
+        @shift_dates(1)
         @render()
                                              
 module.exports = Graph           
