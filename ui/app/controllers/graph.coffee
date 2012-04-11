@@ -20,9 +20,9 @@ class Graph extends Spine.Controller
          
 
     events:
-        'click #timeSelect' : 'click_quantum'
-        'click #leftButton' : 'click_left'
-        'click #rightButton': 'click_right'
+        'tap #timeSelect' : 'click_quantum'
+        'tap #leftButton' : 'click_left'
+        'tap #rightButton': 'click_right'
         'swiperight #bar1'  : 'swipe_right'
         'swipeleft #bar1'   : 'swipe_left'     
           
@@ -79,7 +79,7 @@ class Graph extends Spine.Controller
         template = '<div style="text-align: center">
             <canvas id="bar1" width="480" height="200">[No canvas support]</canvas>
             <div id="timeSelect">
-            <input id="yearInput" type="radio" name="time" value="Year" checked > Year
+            <input id="yearInput" type="radio" name="time" value="Year" checked > Year 
             <input id="monthInput" type="radio" name="time" value="Month"> Month
             <input id="weekInput" type="radio" name="time" value="Week"> Week
             <input id="dayInput" type="radio" name="time" value ="Day"> Day
