@@ -69,8 +69,8 @@ class Graph extends Spine.Controller
         @dateString = @makeDateString()
         console.log @dateString
         template = '<div style="text-align: center">
-                    <canvas id="bar1" width="480" height="200">[No canvas support]</canvas>
-                    <div id="timeSelect" data-role="controlgroup" data-type="horizontal" class="ui-corner-all ui-controlgroup ui-controlgroup-horizontal">
+                    <canvas id="bar1" width="480" height="185">[No canvas support]</canvas>
+                    <div id="timeSelect" data-role="controlgroup" data-type="horizontal" data-mini="true" class="ui-corner-all ui-controlgroup ui-controlgroup-horizontal">
                     <a href="#" id="yearInput"  value="Year" data-role="button" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="c" class="ui-btn ui-corner-left ui-btn-up-c">
                     <span class="ui-btn-inner ui-corner-left">
                     <span class="ui-button-text"> Year </span>
