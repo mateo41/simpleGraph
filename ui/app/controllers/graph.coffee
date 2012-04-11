@@ -62,18 +62,6 @@ class Graph extends Spine.Controller
                 ["/api/1.0/year/", @state.date.getFullYear(), "/week/", @state.date.getWeekOfYear()].join("")
             when 'D'
                 ["/api/1.0/year/", @state.date.getFullYear(), "/day/", @state.date.getDayOfYear()+1].join("")             
-    
-    updateView: =>
-        console.log @state.quantum
-        #switch @state.quantum
-        #    when 'Y'
-        #        @yearBox.attr("checked", "checked")
-        #    when 'M'
-        #        @monthBox.attr("checked", "checked")
-        #    when 'W'
-        #        @weekBox.attr("checked", "checked")
-        #    when 'D'
-        #        @dayBox.attr("checked", "checked")
                 
     render: =>
         console.log "In render" 
@@ -81,7 +69,6 @@ class Graph extends Spine.Controller
             @dateString = @makeDateString()
             console.log @dateString
             @html $.mustache(template, @)
-            @updateView()
             url = @makeUrl()
             @doRest(url)
         
@@ -148,7 +135,6 @@ class Graph extends Spine.Controller
             
     click_quantum_year: (event) =>
         console.log "clicked year button"
-        quantum = 'Y'
         dayInYear = @state.date.getDayOfYear()
         @state.date.addDays(-dayInYear)
         @state.quantum = 'Y'
