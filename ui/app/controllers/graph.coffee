@@ -20,9 +20,12 @@ class Graph extends Spine.Controller
          
 
     events:
-        'tap #timeSelect' : 'click_quantum'
-        'tap #leftButton' : 'click_left'
-        'tap #rightButton': 'click_right'
+        'tap #yearInput'    : 'click_quantum_year'
+        'tap #monthInput'   : 'click_quantum_month'
+        'tap #weekInput'    : 'click_quantum_week'
+        'tap #dayInput'     : 'click_quantum_day'
+        'tap #leftButton'   : 'click_left'
+        'tap #rightButton'  : 'click_right'
         'swiperight #bar1'  : 'swipe_right'
         'swipeleft #bar1'   : 'swipe_left'     
           
@@ -60,37 +63,39 @@ class Graph extends Spine.Controller
             when 'D'
                 ["/api/1.0/year/", @state.date.getFullYear(), "/day/", @state.date.getDayOfYear()+1].join("")             
     
-    updateView: =>
-        console.log @state.quantum
-        switch @state.quantum
-            when 'Y'
-                @yearBox.attr("checked", "checked")
-            when 'M'
-                @monthBox.attr("checked", "checked")
-            when 'W'
-                @weekBox.attr("checked", "checked")
-            when 'D'
-                @dayBox.attr("checked", "checked")
                 
     render: =>
         console.log "In render" 
         @dateString = @makeDateString()
         console.log @dateString
         template = '<div style="text-align: center">
-            <canvas id="bar1" width="480" height="200">[No canvas support]</canvas>
-            <div id="timeSelect">
-            <input id="yearInput" type="radio" name="time" value="Year" checked > Year 
-            <input id="monthInput" type="radio" name="time" value="Month"> Month
-            <input id="weekInput" type="radio" name="time" value="Week"> Week
-            <input id="dayInput" type="radio" name="time" value ="Day"> Day
-            <img src="./images/2arrow_left.png" id="leftButton"/>
-            {{dateString}}
-            <img src="./images/2arrow_right.png" id="rightButton"/>
-            </div>
-            </div>'
+                    <canvas id="bar1" width="480" height="200">[No canvas support]</canvas>
+                    <div id="timeSelect" data-role="controlgroup" data-type="horizontal" class="ui-corner-all ui-controlgroup ui-controlgroup-horizontal">
+                    <a href="#" id="yearInput"  value="Year" data-role="button" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="c" class="ui-btn ui-corner-left ui-btn-up-c">
+                    <span class="ui-btn-inner ui-corner-left">
+                    <span class="ui-button-text"> Year </span>
+                    </span>
+                    </a>
+					<a href="#" id="monthInput" value="Month" data-role="button" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="c" class="ui-btn ui-btn-up-c">
+                    <span class="ui-btn-inner">
+                    <span class="ui-button-text" > Month </span>
+                    </span>
+                    </a>
+                    <a href="#" id="weekInput" value="Week" data-role="button" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="c" class="ui-btn ui-btn-up-c">
+                    <span class="ui-btn-inner">
+                    <span class="ui-button-text" > Week </span>
+                    </span>
+                    </a>
+                    <a href="#" id="dayInput" data-role="button" value="Day" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="c" class="ui-btn ui-btn-up-c ui-corner-right ui-controlgroup-last">
+                    <span class="ui-btn-inner ui-corner-right ui-controlgroup-last">
+                    <span class="ui-btn-text">Day </span>
+                    </span>
+                    </a>
+                    </div>
+                    </div>'
+        
         
         @html $.mustache(template, @)
-        @updateView()
         url = @makeUrl()
         @doRest(url)
         
@@ -154,21 +159,32 @@ class Graph extends Spine.Controller
         @render()
         @el.addClass('active')
         @
-            
-    click_quantum: (event) =>
-        console.log "Clicked Radio button"
-        box = $('input:checked')
-        time = box.attr("value")
-        quantum = time[0]
-        if quantum is 'M'
-            dayInMonth = @state.date.getDate()
-            @state.date.addDays(-(dayInMonth-1))
-        if quantum is 'Y'
-            dayInYear = @state.date.getDayOfYear()
-            @state.date.addDays(-dayInYear)
-            
-        @state.quantum = quantum
+    
+    click_quantum_year: (event) =>
+        console.log "clicked year button"
+        quantum = 'Y'
+        dayInYear = @state.date.getDayOfYear()
+        @state.date.addDays(-dayInYear)
+        @state.quantum = 'Y'
         @render()
+
+    click_quantum_month: (event) =>
+    	console.log "clicked month button"
+    	console.log "test"
+    	dayInMonth = @state.date.getDate()
+    	@state.date.addDays(-(dayInMonth-1))
+    	@state.quantum = 'M'
+    	@render()
+          
+    click_quantum_week: (event) =>
+    	console.log "clicked week button"
+    	@state.quantum = 'W'
+    	@render()
+    
+    click_quantum_day: (event) =>
+        console.log "clicked day button"
+        @state.quantum = 'D'
+        @render()        
    
     shift_dates: (amount) => 
         switch @state.quantum
